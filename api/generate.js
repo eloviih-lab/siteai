@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const allMessages = [
     {
       role: "user",
-      parts: [{ text: `Ты — мастер веб-разработки. Пользователь описывает сайт, и ты создаёшь его ПОЛНЫЙ HTML-код.\n\nПРАВИЛА:\n1. Возвращай ТОЛЬКО валидный HTML — ничего больше.\n2. Весь CSS — внутри тега <style> в <head>. Весь JS — внутри <script> в конце <body>.\n3. Сайт должен быть красивым, современным.\n4. Используй Google Fonts.\n5. Делай адаптивный дизайн.\n6. Используй реальный контент — не Lorem ipsum.\n7. Минимум 3 секции на странице.\n8. Добавь плавные CSS-анимации.\n\nТеперь выполни задачу: ` + messages[0].content }]
+      parts: [{ text: "Ты мастер веб-разработки. Создай ПОЛНЫЙ HTML-код сайта. Возвращай ТОЛЬКО валидный HTML без пояснений. CSS внутри <style>, JS внутри <script>. Сайт красивый, адаптивный, с реальным контентом, минимум 3 секции, Google Fonts, анимации.\n\nЗадача: " + (messages[0]?.content || "") }]
     },
     ...messages.slice(1).map(m => ({
       role: m.role === "assistant" ? "model" : "user",
@@ -29,7 +29,6 @@ export default async function handler(req, res) {
         }),
       }
     );
-
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
     res.status(200).json({ result: text });
