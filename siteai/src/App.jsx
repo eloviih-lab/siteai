@@ -105,18 +105,20 @@ export default function App() {
 
   async function generate(messages) {
     const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-    const contents = messages.map(m => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
+    const allMessages = [
+      { role: "user", parts: [{ text: SYSTEM_PROMPT + "\n\nТеперь выполни задачу: " + messages[0].content }] },
+      ...messages.slice(1).map(m => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      })),
+    ];
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents,
+          contents: allMessages,
           generationConfig: { maxOutputTokens: 8192 },
         }),
       }
