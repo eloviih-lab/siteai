@@ -103,30 +103,16 @@ export default function App() {
   const [editPrompt, setEditPrompt] = useState("");
   const [activeTab, setActiveTab] = useState("preview");
 
-  async function generate(messages) {
-    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-    const allMessages = [
-      { role: "user", parts: [{ text: SYSTEM_PROMPT + "\n\nТеперь выполни задачу: " + messages[0].content }] },
-      ...messages.slice(1).map(m => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      })),
-    ];
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: allMessages,
-          generationConfig: { maxOutputTokens: 8192 },
-        }),
-      }
-    );
-    if (!response.ok) throw new Error("API error: " + response.status);
-    const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
-  }
+async function generate(messages) {
+  const response = await fetch("/api/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages }),
+  });
+  if (!response.ok) throw new Error("API error: " + response.status);
+  const data = await response.json();
+  return data.result || "";
+}}
 
   async function handleGenerate() {
     if (!prompt.trim()) return;
